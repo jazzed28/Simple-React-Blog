@@ -15,16 +15,38 @@ class Form extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
+  componentWillReceiveProps(nextProps) {
+    if(nextProps.articleToEdit) {
+      this.setState({
+        title: nextProps.articleToEdit.title,
+        description: nextProps.articleToEdit.description,
+        author: nextProps.articleToEdit.author
+      })
+    }
+  }
+
   handleSubmit() {
-    const { onSubmit } = this.props;
+    const { onSubmit, articleToEdit, onEdit } = this.props;
     const { title, description, author } = this.state;
 
-    return axios.post('http://localhost:8000/api/articles/', {
-      title,
-      description,
-      author
-    })
-      .then((res) => onSubmit(res.data));
+    if(!articleToEdit) {
+      return axios.post('http://localhost:8000/api/articles/', {
+        title,
+        description,
+        author
+      })
+        .then((res) => onSubmit(res.data))
+        .then(() => this.setState({ title: '', body: '', author: '' }));
+    } else {
+      return axios.patch(`http://localhost:8000/api/articles/${articleToEdit._id}`, {
+        title,
+        description,
+        author
+      })
+        .then((res) => onEdit(res.data))
+        .then(() => this.setState({ title: '', body: '', author: '' }));
+    }
+
   }
 
   handleChangeField(key, event) {
@@ -34,6 +56,7 @@ class Form extends Component {
   }
 
   render() {
+    const { articleToEdit } = this.props;
     const { title, description, author } = this.state;
 
     return (
@@ -58,7 +81,7 @@ class Form extends Component {
         />
         <button 
           onClick={this.handleSubmit}
-          className="btn btn-primary float-right">Submit</button>
+          className="btn btn-primary float-right">{articleToEdit ? 'Update' : 'Submit'}</button>
       </div>
     )
   }
@@ -66,5 +89,11 @@ class Form extends Component {
 
 const mapDispatchToProps = dispatch => ({
   onSubmit: data => dispatch({ type: 'SUBMIT_ARTICLE', data }),
+  onEdit: data => dispatch({ type: 'EDIT_ARTICLE', data }),
 })
-export default connect(null, mapDispatchToProps)(Form);
+
+const mapStateToProps = state => ({
+  articleToEdit: state.home.articleToEdit,
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Form);
