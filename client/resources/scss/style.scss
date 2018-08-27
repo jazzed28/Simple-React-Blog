@@ -1,0 +1,9 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+@import "~bootstrap/scss/bootstrap";
+
+body, html {
+  height: 100%;
+  background-color: rgba(0,0,0,0.02);
+  color: rgba(0,0,0,0.75);
+  font-family: 'Open Sans';
+}
