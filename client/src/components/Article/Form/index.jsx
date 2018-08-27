@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-
+import { connect } from 'react-redux';
 class Form extends Component {
   constructor(props){
     super(props);
@@ -16,13 +16,15 @@ class Form extends Component {
   }
 
   handleSubmit() {
+    const { onSubmit } = this.props;
     const { title, description, author } = this.state;
 
     return axios.post('http://localhost:8000/api/articles/', {
       title,
       description,
       author
-    });
+    })
+      .then((res) => onSubmit(res.data));
   }
 
   handleChangeField(key, event) {
@@ -62,4 +64,7 @@ class Form extends Component {
   }
 }
 
-export default Form;
+const mapDispatchToProps = dispatch => ({
+  onSubmit: data => dispatch({ type: 'SUBMIT_ARTICLE', data }),
+})
+export default connect(null, mapDispatchToProps)(Form);
